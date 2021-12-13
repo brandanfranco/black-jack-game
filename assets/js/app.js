@@ -1,16 +1,28 @@
-(() => {
+const myModule = (() => {
+  "use strict";
   let deck = [],
-    pointsGamers = [];
+    pointsGamers = [],
+    gamerPoints = 0;
   const tipos = ["C", "D", "H", "S"],
     especiales = ["A", "J", "Q", "K"];
 
   const initializationGame = (numGamers = 2) => {
-    crearDeck();
+    deck = crearDeck();
+    pointsGamers = [];
     for (let index = 0; index < numGamers; index++) {
       pointsGamers.push(0);
     }
 
-    console.log(pointsGamers);
+    small.forEach((element) => {
+      element.innerText = 0;
+    });
+
+    divCards.forEach((element) => {
+      element.innerHTML = "";
+    });
+
+    btnGetCard.disabled = false;
+    btnStop.disabled = false;
   };
 
   const crearDeck = () => {
@@ -53,17 +65,11 @@
     btnStop = document.querySelector("#btnStop"),
     btnNewGame = document.querySelector("#btnNewGame");
 
-  // let gamerPoints = 0,
-  // computerPoints = 0;
-
   btnGetCard.addEventListener("click", () => {
     const card = getCard();
     const gamerPoints = totalPoints(card, 0);
 
-    const imgCard = document.createElement("img");
-    imgCard.src = `./cartas/${card}.png`;
-    imgCard.classList.add("cards");
-    gamerDiv.append(imgCard);
+    createCard(card, 0);
 
     if (gamerPoints > 21) {
       console.log("Lo siento perdiste, intentalo de nuevo");
@@ -86,40 +92,42 @@
     return pointsGamers[turn];
   };
 
-  const computerturn = (points) => {
-    do {
-      const card = getCard();
-      totalPoints(card, pointsGamers.length - 1);
+  const createCard = (card, turn) => {
+    const imgCard = document.createElement("img");
+    imgCard.src = `./cartas/${card}.png`;
+    imgCard.classList.add("cards");
+    divCards[turn].append(imgCard);
+  };
 
-      const imgCard = document.createElement("img");
-      imgCard.src = `./cartas/${card}.png`;
-      imgCard.classList.add("cards");
-      computerDiv.append(imgCard);
-
-      if (points > 21) {
-        break;
-      }
-    } while (computerPoints < points && points <= 21);
-
+  const winner = () => {
+    const [points, computerPoints] = pointsGamers;
     setTimeout(() => {
-      if (gamerPoints <= 21 && gamerPoints > computerPoints) {
-        alert("felicitaciones Ganaste");
-      } else if ((computerPoints <= 21) & (computerPoints > gamerPoints)) {
-        alert("Computadora Gano ");
-      } else if (gamerPoints === computerPoints) {
+      if (points === computerPoints) {
         alert("Nadie Gano");
       } else if (computerPoints > 21) {
         alert("Felictaciones Ganaste");
-      } else if (gamerPoints > 21) {
+      } else if (points > 21) {
         alert("Lo siento perdiste, intentalo de nuevo");
+      } else {
+        alert("Computadora Gana");
       }
-    }, 30);
+    }, 100);
+  };
+
+  const computerturn = (points) => {
+    let computerPoints = 0;
+    do {
+      const card = getCard();
+      computerPoints = totalPoints(card, pointsGamers.length - 1);
+      createCard(card, pointsGamers.length - 1);
+    } while (computerPoints < points && points <= 21);
+    winner();
   };
 
   btnStop.addEventListener("click", () => {
     btnGetCard.disabled = true;
     btnStop.disabled = true;
-    computerturn(gamerPoints);
+    computerturn(pointsGamers[0]);
   });
 
   btnNewGame.addEventListener("click", () => {
@@ -130,4 +138,8 @@
     // gamerPoints = 0;
     // computerPoints = 0;
   });
+
+  return {
+    newGame: initializationGame,
+  };
 })();
